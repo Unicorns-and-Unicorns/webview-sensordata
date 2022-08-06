@@ -22,6 +22,7 @@ Sensor data is sent to the WebView as a JSON object.
 ```
 
 ### Complete react-native implementation
+
 ```tsx
 import React, { useEffect, useRef } from 'react';
 import {
@@ -59,7 +60,7 @@ setUpdateIntervalForType(SensorTypes.magnetometer, 500);
 export const App = () => {
   const webViewRef = useRef<null | WebView>(null);
   // TODO change this to production url
-  const uri = 'https://example.com';
+  const uri = 'http://54.183.78.200:3005/';
 
   const handleUpdateSensorData = (data: SensorData) => {
     const injected = `
@@ -78,9 +79,9 @@ export const App = () => {
       magnetometerSensor, 
     ]: [CoordinateSensorData, CoordinateSensorData, CoordinateSensorData]) => {
       const data: SensorData = {
-        gyroscope: gyroscopeSensor,
-        accelerometer: accelerometerSensor,
-        magnetometer: magnetometerSensor,
+        gyroscope: gyroscopeSensor || null,
+        accelerometer: accelerometerSensor || null,
+        magnetometer: magnetometerSensor || null,
       }
       handleUpdateSensorData(data);
     });

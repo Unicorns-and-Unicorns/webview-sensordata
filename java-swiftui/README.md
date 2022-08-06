@@ -24,8 +24,6 @@ The application is not using any third party dependencies, everything is part of
 ```java
 package com.example.sensordatapoc;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -33,9 +31,10 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,7 +43,7 @@ import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
   // TODO change this to production url
-  private static final String URL = "file:///android_asset/webApp.html";
+  private static final String URL = "http://54.183.78.200:3005/";
 
   private SensorManager sensorManager;
   private Sensor accelerometer;
@@ -52,9 +51,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
   private Sensor magnetometer;
   private WebView webView;
 
-  private String accelerometerData = "";
-  private String gyroscopeData = "";
-  private String magnetometerData = "";
+  private String accelerometerData = null;
+  private String gyroscopeData = null;
+  private String magnetometerData = null;
   private String sensorData = null;
 
   @Override
@@ -87,6 +86,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
     gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
     magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+    // if there is no sensor available json object with null values will be passed to webview
+    if (accelerometer == null && gyroscope == null && magnetometer == null) {
+      passSensorData(generateJSONSensorData());
+    }
   }
 
   @Override
@@ -197,9 +200,9 @@ import SwiftUI
 
 class MotionManager: ObservableObject {  
   private var motionManager: CMMotionManager
-  private var accelerometerData: [Double] = [0.0, 0.0, 0.0]
-  private var magnetometerData: [Double] = [0.0, 0.0, 0.0]
-  private var gyroData: [Double] = [0.0, 0.0, 0.0]
+  private var accelerometerData: [Double] = []
+  private var magnetometerData: [Double] = []
+  private var gyroData: [Double] = []
   @Published var sensorDataJSON: String = "";
       
   init() {
@@ -210,6 +213,10 @@ class MotionManager: ObservableObject {
   }
   
   func updateAccelerometerData() {
+    self.accelerometerData.removeAll()
+    if (!self.motionManager.isAccelerometerAvailable){
+      return;
+    }
     self.motionManager.accelerometerUpdateInterval = 1
     self.motionManager.startAccelerometerUpdates(to: .main) { (accelerometerData, error) in
       guard error == nil else {
@@ -218,15 +225,19 @@ class MotionManager: ObservableObject {
       }
       
       if let aData = accelerometerData {
-        self.accelerometerData[0] = aData.acceleration.x
-        self.accelerometerData[1] = aData.acceleration.y
-        self.accelerometerData[2] = aData.acceleration.z
+        self.accelerometerData.append(aData.acceleration.x)
+        self.accelerometerData.append(aData.acceleration.y)
+        self.accelerometerData.append(aData.acceleration.z)
       }
       self.createSensorDataJSON()
     }
   }
   
   func updateMagnetometerData() {
+    self.magnetometerData.removeAll()
+    if (!self.motionManager.isMagnetometerAvailable){
+      return;
+    }
     self.motionManager.magnetometerUpdateInterval = 1
     self.motionManager.startMagnetometerUpdates(to: .main) { (magnetometerData, error) in
       guard error == nil else {
@@ -235,15 +246,19 @@ class MotionManager: ObservableObject {
       }
       
       if let magnetData = magnetometerData {
-        self.magnetometerData[0] = magnetData.magneticField.x
-        self.magnetometerData[1] = magnetData.magneticField.y
-        self.magnetometerData[2] = magnetData.magneticField.z
+        self.magnetometerData.append(magnetData.magneticField.x)
+        self.magnetometerData.append(magnetData.magneticField.y)
+        self.magnetometerData.append(magnetData.magneticField.z)
       }
       self.createSensorDataJSON()
     }
   }
   
   func updateGyroscopeData() {
+    self.gyroData.removeAll()
+    if (!self.motionManager.isGyroAvailable){
+      return;
+    }
     self.motionManager.gyroUpdateInterval = 1
     self.motionManager.startGyroUpdates(to: .main) { (gyroData, error) in
       guard error == nil else {
@@ -252,16 +267,16 @@ class MotionManager: ObservableObject {
       }
       
       if let gData = gyroData {
-        self.gyroData[0] = gData.rotationRate.x
-        self.gyroData[1] = gData.rotationRate.y
-        self.gyroData[2] = gData.rotationRate.z
+        self.gyroData.append(gData.rotationRate.x)
+        self.gyroData.append(gData.rotationRate.y)
+        self.gyroData.append(gData.rotationRate.z)
       }
       self.createSensorDataJSON()
     }
   }
   
   private func createSensorDataJSON() {
-    let sensorData = SensorDataModel(accelerometer: self.accelerometerData.description, magnetometer: self.magnetometerData.description, gyroscope: self.gyroData.description)
+    let sensorData = SensorDataModel(accelerometer: self.accelerometerData.isEmpty ? nil : self.accelerometerData.description, magnetometer: self.magnetometerData.isEmpty ? nil : self.magnetometerData.description, gyroscope: self.gyroData.isEmpty ? nil : self.gyroData.description)
     do {
       let jsonData = try JSONEncoder().encode(sensorData)
       sensorDataJSON = String(data: jsonData, encoding: String.Encoding.utf8) ?? ""
@@ -306,7 +321,7 @@ struct WebView: UIViewRepresentable {
       }
     } else if urlType == .publicUrl {
       // TODO change this to production url
-      if let url = URL(string: "https://...") {
+      if let url = URL(string: "http://54.183.78.200:3005/") {
         webView.load(URLRequest(url: url))
       }
     }
