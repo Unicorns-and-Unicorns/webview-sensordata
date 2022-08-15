@@ -60,7 +60,7 @@ setUpdateIntervalForType(SensorTypes.magnetometer, 500);
 export const App = () => {
   const webViewRef = useRef<null | WebView>(null);
   // TODO change this to production url
-  const uri = 'http://54.183.78.200:3005/';
+  const uri = 'https://application-url';
 
   const handleUpdateSensorData = (data: SensorData) => {
     const injected = `

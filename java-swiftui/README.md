@@ -43,7 +43,7 @@ import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
   // TODO change this to production url
-  private static final String URL = "http://54.183.78.200:3005/";
+  private static final String URL = "https://application-url";
 
   private SensorManager sensorManager;
   private Sensor accelerometer;

@@ -35,6 +35,7 @@ export interface MappedSensorData {
   accelerometer: SensorData | undefined;
 }
 
+// TODO change this to production url
 const IFRAME_URL = 'https://application-url';
 
 const App: React.FC = () => {
