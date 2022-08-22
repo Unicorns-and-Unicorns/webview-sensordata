@@ -5,5 +5,6 @@ This repository provides code snippets for the implementation of sending sensor 
 
 - #### **[React Native](https://github.com/Unicorns-and-Unicorns/webview-sensordata/tree/main/react-native)**
 - #### **[Java + SwiftUI](https://github.com/Unicorns-and-Unicorns/webview-sensordata/tree/main/java-swiftui)**
-- #### **[IONIC](https://github.com/Unicorns-and-Unicorns/webview-sensordata/tree/main/ionic)**
+- #### **[IONIC V2](https://github.com/Unicorns-and-Unicorns/webview-sensordata/blob/main/ionic/README_V2.md)**
+- #### **[IONIC V4](https://github.com/Unicorns-and-Unicorns/webview-sensordata/blob/main/ionic/README_V4.md)**
 
