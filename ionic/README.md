@@ -2,13 +2,27 @@
 
 ## IONIC Capacitor (iOS & Android)
 
-IONIC requires `@unicorns-and-unicorns/capacitor-sensors` library to be installed in order to access device sensor data.
+IONIC requires `@unicorns-and-unicorns/capacitor-sensors-v2` library to be installed in order to access device sensor data.
 
 ### Installation
 
 ```bash
-npm install @unicorns-and-unicorns/capacitor-sensors --save
-npx cap sync
+npm install @unicorns-and-unicorns/capacitor-sensors-v2 --save
+```
+
+### In your Ionic Android project, add this code, to make to make Capacitor aware of the plugins
+```swift
+public class MainActivity extends BridgeActivity {
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    // Initializes the Bridge
+    this.init(savedInstanceState, new ArrayList<Class<? extends Plugin>>() {{
+      // Additional plugins you've installed go here
+      add(Sensors.class);
+    }});
+  }
+}
 ```
 
 > *IONIC uses the HTML `iframe` element to display content. Due to the `Same-Origin` policy on iframes, we cannot directly inject data into the window of the iframe since the IONIC app and the iframe web application are not served from the same origin. To enable `Cross-Origin` communication we must use the `frameRef.contentWindow.postMessage()` function to send sensor data over to the iframe web application.
@@ -27,7 +41,8 @@ Sensor data is sent to the iframe as a JSON object.
 
 ```tsx
 import { useEffect, useCallback, useState } from 'react';
-import { Sensors, SensorData } from '@unicorns-and-unicorns/capacitor-sensors';
+import { Plugins } from '@capacitor/core';
+import { SensorData } from '@unicorns-and-unicorns/capacitor-sensors-v2';
 
 export interface MappedSensorData {
   magnetometer: SensorData | undefined;
@@ -46,21 +61,21 @@ const App: React.FC = () => {
   const [accelerometer, setAccelerometer] = useState<SensorData>();
 
   useEffect(() => {
-    Sensors.addListener('magnetometerChange', (res: SensorData) => {
+    Plugins.Sensors.addListener('magnetometerChange', (res: SensorData) => {
       setMagnetometer({
         x: res.x,
         y: res.y,
         z: res.z,
       });
     });
-    Sensors.addListener('gyroscopeChange', (res: SensorData) => {
+    Plugins.Sensors.addListener('gyroscopeChange', (res: SensorData) => {
       setGyroscope({
         x: res.x,
         y: res.y,
         z: res.z,
       });
     });
-    Sensors.addListener('accelerometerChange', (res: SensorData) => {
+    Plugins.Sensors.addListener('accelerometerChange', (res: SensorData) => {
       setAccelerometer({
         x: res.x,
         y: res.y,
