@@ -12,7 +12,7 @@ npx cap sync
 ```
 
 ### In your Ionic Android project, add this code, to make to make Capacitor aware of the plugins
-```swift
+```java
 import com.ctss.sensors.Sensors;
 
 public class MainActivity extends BridgeActivity {
