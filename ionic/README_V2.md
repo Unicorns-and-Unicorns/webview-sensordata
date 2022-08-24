@@ -8,6 +8,7 @@ IONIC requires `@unicorns-and-unicorns/capacitor-sensors-v2` library to be insta
 
 ```bash
 npm install @unicorns-and-unicorns/capacitor-sensors-v2 --save
+npx cap sync
 ```
 
 ### In your Ionic Android project, add this code, to make to make Capacitor aware of the plugins
