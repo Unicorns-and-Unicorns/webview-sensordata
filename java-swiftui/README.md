@@ -12,15 +12,58 @@ Sensor data is sent to the WebView as a JSON object.
 
 ```
 {
-  "accelerometer": "[x, y, z]",
-  "gyroscope": "[x, y, z]",
-  "magnetometer": "[x, y, z]"
+  "accelerometer": {
+    x: value, 
+    y: value, 
+    z: value,
+  },
+  "gyroscope": {
+    x: value, 
+    y: value, 
+    z: value,
+  },,
+  "magnetometer": {
+    x: value, 
+    y: value, 
+    z: value,
+  },
 }
 ```
 
 The application is not using any third party dependencies, everything is part of the Android API.
 
 ### Complete java implementation:
+
+**Coordinates.java**
+```java
+package com.example.sensordatapoc;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+class Coordinates {
+  Float x;
+  Float y;
+  Float z;
+
+  public Coordinates() {
+  }
+
+  public JSONObject toJSON() {
+    JSONObject jo = new JSONObject();
+    try {
+      jo.put("x", x);
+      jo.put("y", y);
+      jo.put("z", z);
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    return jo;
+  }
+}
+```
+
+**MainActivity.java**
 ```java
 package com.example.sensordatapoc;
 
@@ -51,9 +94,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
   private Sensor magnetometer;
   private WebView webView;
 
-  private String accelerometerData = null;
-  private String gyroscopeData = null;
-  private String magnetometerData = null;
+  private Coordinates accelerometerData = new Coordinates();
+  private Coordinates gyroscopeData = new Coordinates();
+  private Coordinates magnetometerData = new Coordinates();
   private String sensorData = null;
 
   @Override
@@ -95,11 +138,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
   @Override
   public final void onSensorChanged(SensorEvent event) {
     if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-      accelerometerData = Arrays.toString(event.values);
+      accelerometerData.x = event.values[0];
+      accelerometerData.y = event.values[1];
+      accelerometerData.z = event.values[2];
     } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-      gyroscopeData = Arrays.toString(event.values);
+      gyroscopeData.x = event.values[0];
+      gyroscopeData.y = event.values[1];
+      gyroscopeData.z = event.values[2];
     } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-      magnetometerData = Arrays.toString(event.values);
+      magnetometerData.x = event.values[0];
+      magnetometerData.y = event.values[1];
+      magnetometerData.z = event.values[2];
     }
 
     if (generateJSONSensorData().equals(sensorData)) {
@@ -114,9 +163,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     String result = "";
     JSONObject json = new JSONObject();
     try {
-      json.put("accelerometer", accelerometerData);
-      json.put("gyroscope", gyroscopeData);
-      json.put("magnetometer", magnetometerData);
+      json.put("accelerometer", accelerometerData.toJSON());
+      json.put("gyroscope", gyroscopeData.toJSON());
+      json.put("magnetometer", magnetometerData.toJSON());
       result = json.toString();
     } catch (JSONException e) {
       e.printStackTrace();
@@ -159,9 +208,21 @@ Sensor data is sent to the WebView as a JSON object.
 
 ```
 {
-  "accelerometer": "[x, y, z]",
-  "gyroscope": "[x, y, z]",
-  "magnetometer": "[x, y, z]"
+  "accelerometer": {
+    x: value, 
+    y: value, 
+    z: value,
+  },
+  "gyroscope": {
+    x: value, 
+    y: value, 
+    z: value,
+  },,
+  "magnetometer": {
+    x: value, 
+    y: value, 
+    z: value,
+  },
 }
 ```
 
@@ -171,9 +232,9 @@ Sensor data is sent to the WebView as a JSON object.
 import Foundation
 
 struct SensorDataModel: Encodable {
-  var accelerometer: String
-  var magnetometer: String
-  var gyroscope: String
+  var accelerometer: Coordinates?
+  var magnetometer: Coordinates?
+  var gyroscope: Coordinates?
 }
 ```
   
@@ -191,6 +252,17 @@ enum WebUrlType {
   case localUrl, publicUrl
 }
 ```
+
+**Coordinates**
+```swift
+import Foundation
+
+struct Coordinates: Encodable {
+  var x: Double?
+  var y: Double?
+  var z: Double?
+}
+```
   
 **MotionManager**
 ```swift
@@ -200,9 +272,9 @@ import SwiftUI
 
 class MotionManager: ObservableObject {  
   private var motionManager: CMMotionManager
-  private var accelerometerData: [Double] = []
-  private var magnetometerData: [Double] = []
-  private var gyroData: [Double] = []
+  private var accelerometerData: Coordinates = Coordinates()
+  private var magnetometerData: Coordinates = Coordinates()
+  private var gyroData: Coordinates = Coordinates()
   @Published var sensorDataJSON: String = "";
       
   init() {
@@ -213,7 +285,9 @@ class MotionManager: ObservableObject {
   }
   
   func updateAccelerometerData() {
-    self.accelerometerData.removeAll()
+    self.accelerometerData.x = nil
+    self.accelerometerData.y = nil
+    self.accelerometerData.z = nil
     if (!self.motionManager.isAccelerometerAvailable){
       return;
     }
@@ -225,16 +299,18 @@ class MotionManager: ObservableObject {
       }
       
       if let aData = accelerometerData {
-        self.accelerometerData.append(aData.acceleration.x)
-        self.accelerometerData.append(aData.acceleration.y)
-        self.accelerometerData.append(aData.acceleration.z)
+        self.accelerometerData.x = aData.acceleration.x
+        self.accelerometerData.y = aData.acceleration.y
+        self.accelerometerData.z = aData.acceleration.z
       }
       self.createSensorDataJSON()
     }
   }
   
   func updateMagnetometerData() {
-    self.magnetometerData.removeAll()
+    self.magnetometerData.x = nil
+    self.magnetometerData.y = nil
+    self.magnetometerData.z = nil
     if (!self.motionManager.isMagnetometerAvailable){
       return;
     }
@@ -246,16 +322,18 @@ class MotionManager: ObservableObject {
       }
       
       if let magnetData = magnetometerData {
-        self.magnetometerData.append(magnetData.magneticField.x)
-        self.magnetometerData.append(magnetData.magneticField.y)
-        self.magnetometerData.append(magnetData.magneticField.z)
+        self.magnetometerData.x = magnetData.magneticField.x
+        self.magnetometerData.y = magnetData.magneticField.y
+        self.magnetometerData.z = magnetData.magneticField.z
       }
       self.createSensorDataJSON()
     }
   }
   
   func updateGyroscopeData() {
-    self.gyroData.removeAll()
+    self.gyroData.x = nil
+    self.gyroData.y = nil
+    self.gyroData.z = nil
     if (!self.motionManager.isGyroAvailable){
       return;
     }
@@ -267,16 +345,16 @@ class MotionManager: ObservableObject {
       }
       
       if let gData = gyroData {
-        self.gyroData.append(gData.rotationRate.x)
-        self.gyroData.append(gData.rotationRate.y)
-        self.gyroData.append(gData.rotationRate.z)
+        self.gyroData.x = gData.rotationRate.x
+        self.gyroData.y = gData.rotationRate.y
+        self.gyroData.z = gData.rotationRate.z
       }
       self.createSensorDataJSON()
     }
   }
   
   private func createSensorDataJSON() {
-    let sensorData = SensorDataModel(accelerometer: self.accelerometerData.isEmpty ? nil : self.accelerometerData.description, magnetometer: self.magnetometerData.isEmpty ? nil : self.magnetometerData.description, gyroscope: self.gyroData.isEmpty ? nil : self.gyroData.description)
+    let sensorData = SensorDataModel(accelerometer: self.accelerometerData, magnetometer: self.magnetometerData, gyroscope: self.gyroData)
     do {
       let jsonData = try JSONEncoder().encode(sensorData)
       sensorDataJSON = String(data: jsonData, encoding: String.Encoding.utf8) ?? ""
@@ -320,8 +398,8 @@ struct WebView: UIViewRepresentable {
         webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
       }
     } else if urlType == .publicUrl {
-      // TODO change this to production url
-      if let url = URL(string: "http://54.183.78.200:3005/") {
+      // Load a public website, for example I used here google.com
+      if let url = URL(string: "https://www.google.com") {
         webView.load(URLRequest(url: url))
       }
     }
@@ -369,8 +447,7 @@ struct ContentView: View {
   
   var body: some View {
     VStack {
-      // WebView(urlType: .publicUrl, url: "https://...", viewModel: viewModel)
-      WebView(urlType: .localUrl, url: "", viewModel: viewModel).onReceive(motion.$sensorDataJSON) { value in
+      WebView(urlType: .publicUrl, url: "https://example.com", viewModel: viewModel).onReceive(motion.$sensorDataJSON) { value in
         self.viewModel.valuePublisher.send(motion.sensorDataJSON)
       }
     }
