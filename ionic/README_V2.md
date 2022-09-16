@@ -85,6 +85,10 @@ const App: React.FC = () => {
         z: res.z,
       });
     });
+
+    return () => {
+		  Plugins.Sensors.removeAllListeners();
+	  }
   }, []);
 
   useEffect(() => {
