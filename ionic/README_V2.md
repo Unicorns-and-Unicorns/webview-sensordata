@@ -64,21 +64,21 @@ const App: React.FC = () => {
   const [accelerometer, setAccelerometer] = useState<SensorData>();
 
   useEffect(() => {
-    Plugins.Sensors.addListener('magnetometerChange', (res: SensorData) => {
+    const magnetometerListener = Plugins.Sensors.addListener('magnetometerChange', (res: SensorData) => {
       setMagnetometer({
         x: res.x,
         y: res.y,
         z: res.z,
       });
     });
-    Plugins.Sensors.addListener('gyroscopeChange', (res: SensorData) => {
+    const gyroscopeListener = Plugins.Sensors.addListener('gyroscopeChange', (res: SensorData) => {
       setGyroscope({
         x: res.x,
         y: res.y,
         z: res.z,
       });
     });
-    Plugins.Sensors.addListener('accelerometerChange', (res: SensorData) => {
+    const accelerometerListener = Plugins.Sensors.addListener('accelerometerChange', (res: SensorData) => {
       setAccelerometer({
         x: res.x,
         y: res.y,
@@ -87,7 +87,9 @@ const App: React.FC = () => {
     });
 
     return () => {
-		  Plugins.Sensors.removeAllListeners();
+		  magnetometerListener.remove();
+			gyroscopeListener.remove();
+			accelerometerListener.remove();
 	  }
   }, []);
 
